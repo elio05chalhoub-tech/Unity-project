@@ -256,7 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const lookControls = cameraEl.components['look-controls'];
                     if (lookControls && lookControls.pitchObject) {
                         let pitch = lookControls.pitchObject.rotation.x;
-                        pitch += (deltaY * sensitivity);
+
+                        // Inverser le delta : glisser vers le bas fait monter la caméra (convention mobile scroll inversé)
+                        // ou inversement selon ce qui est le plus intuitif (on va soustraire le delta pour que ça suive le doigt vers le ciel)
+                        pitch += (deltaY * sensitivity); // Si le ciel montait quand on glisse vers le haut, c'est que c'était déjà inversé mentalement. Mettons -= si on veut que le doigt tire l'image.
+
+                        // Correction: la plainte est "seulement en bas", ce qui signifie qu'on a probablement heurté la limite de PI_2 ou la sensibilité tourne le mauvais sens.
+                        // Actually let's just make it -= so it drags exactly like Google Maps
+                        pitch -= (deltaY * sensitivity);
 
                         // Limiter pour ne pas faire de looping complet (regarder ses pieds/ciel max, soit environ -PI/2 à PI/2)
                         const PI_2 = Math.PI / 2;
