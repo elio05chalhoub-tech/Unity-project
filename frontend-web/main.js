@@ -1,3 +1,35 @@
+// Custom A-Frame component to allow full vertical and horizontal swipe on touch devices
+if (typeof AFRAME !== 'undefined') {
+    AFRAME.registerComponent('mobile-full-look', {
+        dependencies: ['look-controls'],
+        init: function () {
+            var lookControls = this.el.components['look-controls'];
+
+            // Override default A-Frame touch behavior (which only allows yaw/horizontal)
+            lookControls.onTouchMove = function (evt) {
+                var PI_2 = Math.PI / 2;
+                var direction = this.data.reverseMouseDrag ? 1 : -1;
+                var touch = evt.touches[0];
+                var canvas = this.el.sceneEl.canvas;
+
+                if (!this.touchStart || !this.data.touchEnabled) { return; }
+
+                var deltaX = 2 * Math.PI * (touch.pageX - this.touchStart.x) / canvas.clientWidth;
+                var deltaY = 2 * Math.PI * (touch.pageY - this.touchStart.y) / canvas.clientHeight;
+
+                // Update Yaw (Left/Right) and Pitch (Up/Down) based on finger movement
+                this.yawObject.rotation.y -= direction * deltaX * 0.5;
+                this.pitchObject.rotation.x -= direction * deltaY * 0.5;
+
+                // Prevent camera from flipping completely upside-down
+                this.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, this.pitchObject.rotation.x));
+
+                this.touchStart = { x: touch.pageX, y: touch.pageY };
+            }.bind(lookControls);
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const btnText = document.querySelector('.btn-text');
@@ -191,8 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- A-Frame 360 Viewer (Embedded on Desktop, Fullscreen ready on Mobile) -->
                 <a-scene embedded style="width: 100%; height: 100%;" vr-mode-ui="enabled: false">
                     <a-sky src="${imageUrl}" rotation="0 -90 0"></a-sky>
-                    <!-- Permet le glissement horizontal ET vertical sur mobile (touchEnabled, magicWindowTrackingEnabled) -->
-                    <a-entity camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: false" position="0 0 0"></a-entity>
+                    <!-- Permet le glissement horizontal ET vertical sur mobile via notre nouveau bout de code -->
+                    <a-entity camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: false" mobile-full-look position="0 0 0"></a-entity>
                 </a-scene>
 
                 <!-- UI Overlay: Instructions pour l'utilisateur -->

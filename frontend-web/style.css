@@ -356,6 +356,9 @@ select:focus {
 
     .workspace {
         min-height: 60vh;
+        height: 60vh;
+        /* Force height so child div's 100% doesn't collapse to 0 */
+        display: block;
         margin-bottom: 2rem;
     }
 }
