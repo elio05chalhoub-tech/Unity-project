@@ -184,23 +184,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show the actual generated result
     function showResultInViewport(imageUrl) {
-        viewport.innerHTML = `
-            <div style="width: 100%; height: 100%; border-radius: 20px; animation: fadeIn 1s ease-out forwards; position: relative; overflow: hidden; background: #000;">
-                
-                <!-- A-Frame 360 Viewer -->
-                <a-scene embedded style="width: 100%; height: 100%;" vr-mode-ui="enabled: false">
-                    <a-sky src="${imageUrl}" rotation="0 -90 0"></a-sky>
-                    <a-entity camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: false"></a-entity>
-                </a-scene>
+        // Obtenir l'URL de base pour pouvoir ouvrir la nouvelle fenêtre correctement
+        const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+        const viewerUrl = `${baseUrl}viewer.html?image=${encodeURIComponent(imageUrl)}`;
 
-                <!-- UI Overlay on top of 3D Canvas -->
-                <div style="position: absolute; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
-                    <button onclick="document.querySelector('a-scene').enterVR()" style="background: linear-gradient(135deg, #ff7e5f, #feb47b); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(255,126,95,0.4); display: flex; align-items: center; gap: 8px; transition: transform 0.2s;">
-                        <span>📱 Plein Écran 360°</span>
-                    </button>
-                    <div style="background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px; backdrop-filter: blur(5px);">
-                        <a href="${imageUrl}" target="_blank" style="color: rgba(255,255,255,0.8); text-decoration: underline; font-size: 0.8rem; font-weight: 400;">Ouvrir l'image source ↗</a>
-                    </div>
+        // Ouvrir automatiquement la nouvelle fenêtre (peut être bloqué par les pop-ups safari/chrome, d'où le bouton)
+        window.open(viewerUrl, '_blank');
+
+        viewport.innerHTML = `
+            <div style="width: 100%; height: 100%; border-radius: 20px; animation: fadeIn 1s ease-out forwards; position: relative; overflow: hidden; background: #1a1a2e; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                
+                <h2 style="color: #20c997; margin-bottom: 20px;">Le monde a été généré avec succès !</h2>
+                <p style="color: #a0a0b0; max-width: 80%; margin-bottom: 30px;">
+                    Une nouvelle fenêtre devrait s'être ouverte avec votre vue 360. Si votre navigateur l'a bloquée, cliquez sur le bouton ci-dessous.
+                </p>
+
+                <img src="${imageUrl}" alt="Aperçu miniature" style="width: 80%; max-height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+
+                <button onclick="window.open('${viewerUrl}', '_blank')" style="background: linear-gradient(135deg, #ff7e5f, #feb47b); color: #fff; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(255,126,95,0.4); display: flex; align-items: center; gap: 8px; transition: transform 0.2s;">
+                    <span>🌍 Ouvrir le visualiseur 360° en plein écran</span>
+                </button>
+                
+                <div style="margin-top: 20px;">
+                    <a href="${imageUrl}" target="_blank" style="color: rgba(255,255,255,0.5); text-decoration: underline; font-size: 0.9rem;">Télécharger l'image brute</a>
                 </div>
             </div>
         `;
