@@ -125,15 +125,14 @@ async def generate_skybox(
     }
 
     # Map UI style selection to Blockade Labs style IDs
-    # Known Blockade IDs (approximate examples for remix model)
-    # 9 = Sci-Fi/Dream, 4 = Digital Painting, 21 = Realism, 29 = Anime, 6 = Cyberpunk
+    # Using confirmed valid M3 IDs from the Skybox API
     STYLE_MAP = {
-        "realistic": "21",
-        "fantasy": "4",
-        "cyberpunk": "6",
-        "anime": "29"
+        "realistic": "67",   # M3 Photoreal
+        "fantasy": "139",    # M3 Fantasy
+        "cyberpunk": "35",   # Cyberpunk
+        "anime": "81"        # M3 Anime
     }
-    mapped_style_id = STYLE_MAP.get(style, "21") # Default to Realism
+    mapped_style_id = STYLE_MAP.get(style, "67") # Default to M3 Photoreal
 
     # Prepare form data
     files = {
