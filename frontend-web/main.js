@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             statusText.textContent = "Envoi de la requête à l'IA...";
 
-            const response = await fetch('http://127.0.0.1:8000/generate', {
+            const response = await fetch(`http://${window.location.hostname}:8000/generate`, {
                 method: 'POST',
                 body: formData
             });
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Promise((resolve, reject) => {
             const interval = setInterval(async () => {
                 try {
-                    const res = await fetch(`http://127.0.0.1:8000/status/${jobId}`);
+                    const res = await fetch(`http://${window.location.hostname}:8000/status/${jobId}`);
                     if (!res.ok) throw new Error("Erreur lors de la vérification du statut");
 
                     const statusData = await res.json();
