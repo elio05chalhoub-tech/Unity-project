@@ -235,9 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (e.touches.length === 1) {
                         isDragging = true;
                         previousTouchY = e.touches[0].pageY;
-                        // Récupérer le pitch actuel de la caméra
-                        const rotation = cameraEl.getAttribute('rotation');
-                        if (rotation) currentPitch = rotation.x;
                     }
                 }, { passive: true });
 
@@ -254,19 +251,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // A-Frame's look-controls gère déjà parfaitement le delta X (droite/gauche)
                     // Nous gérons manuellement le delta Y (Haut/Bas) qui est souvent bloqué
-                    const sensitivity = 0.3; // Vitesse de rotation
-                    currentPitch += (deltaY * sensitivity);
+                    const sensitivity = 0.005; // Sensibilité en radians
 
-                    // Limiter pour ne pas faire de looping complet (regarder ses pieds/ciel max)
-                    currentPitch = Math.max(-85, Math.min(85, currentPitch));
+                    const lookControls = cameraEl.components['look-controls'];
+                    if (lookControls && lookControls.pitchObject) {
+                        let pitch = lookControls.pitchObject.rotation.x;
+                        pitch += (deltaY * sensitivity);
 
-                    // Mettre à jour seulement l'axe X (pitch) sans toucher au Y (yaw) géré par A-Frame
-                    const currentRot = cameraEl.getAttribute('rotation');
-                    cameraEl.setAttribute('rotation', {
-                        x: currentPitch,
-                        y: currentRot.y,
-                        z: currentRot.z
-                    });
+                        // Limiter pour ne pas faire de looping complet (regarder ses pieds/ciel max, soit environ -PI/2 à PI/2)
+                        const PI_2 = Math.PI / 2;
+                        pitch = Math.max(-PI_2, Math.min(PI_2, pitch));
+
+                        // Mettre à jour l'objet interne de A-Frame directement
+                        lookControls.pitchObject.rotation.x = pitch;
+                    }
                 }, { passive: true });
             }
         }, 500);
