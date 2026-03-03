@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showResultInViewport(imageUrl) {
         // Enlève le texte de chargement et affiche la scène 360 directement dans la page
         viewport.innerHTML = `
-            <div style="width: 100%; height: 100%; position: relative; overflow: hidden; background: #000; border-radius: 20px;">
+            <div style="width: 100%; height: 100%; position: relative; overflow: hidden; background: #000; border-radius: 20px; touch-action: none;">
                 
                 <!-- A-Frame 360 Viewer (Embedded on Desktop, Fullscreen ready on Mobile) -->
                 <a-scene embedded style="width: 100%; height: 100%;" vr-mode-ui="enabled: false">

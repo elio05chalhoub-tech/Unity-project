@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     <!-- A-Frame Library for 360-degree VR Viewer -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 </head>
@@ -72,7 +72,7 @@
 
         <!-- Main Workspace Area -->
         <main class="workspace">
-            <div class="viewport glass-panel" id="viewport">
+            <div class="viewport glass-panel" id="viewport" style="touch-action: none;">
                 <!-- Content will be injected here during/after generation -->
                 <div class="viewport-placeholder">
                     <div class="hologram-grid"></div>
@@ -85,7 +85,7 @@
         </main>
     </div>
 
-    <script src="main.js"></script>
+    <script src="main.js?v=2"></script>
 </body>
 
 </html>
