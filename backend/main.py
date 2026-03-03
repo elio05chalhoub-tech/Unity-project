@@ -98,9 +98,14 @@ async def generate_skybox(
                 
             if vision_response.text:
                 final_prompt = vision_response.text
-                print(f"[Vision AI] Success. Overwriting prompt with: {final_prompt[:50]}...")
+                print(f"\n=========================================")
+                print(f"[Vision AI] Success! Generated Prompt:")
+                print(f"{final_prompt}")
+                print(f"=========================================\n")
         except Exception as e:
-            print(f"[Vision AI] Error querying Gemini: {e}")
+            print(f"\n=========================================")
+            print(f"[Vision AI] ERROR querying Gemini: {e}")
+            print(f"=========================================\n")
             pass
     # --------------------------------------
 
