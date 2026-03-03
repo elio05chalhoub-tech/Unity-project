@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <a-scene embedded style="width: 100%; height: 100%;" vr-mode-ui="enabled: false">
                     <a-sky src="${imageUrl}" rotation="0 -90 0"></a-sky>
                     <!-- Permet le glissement horizontal ET vertical sur mobile (touchEnabled, magicWindowTrackingEnabled) -->
-                    <a-entity camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: true" position="0 0 0"></a-entity>
+                    <a-entity camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: false" position="0 0 0"></a-entity>
                 </a-scene>
 
                 <!-- UI Overlay: Instructions pour l'utilisateur -->
@@ -206,5 +206,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `;
+
+        // Scroll automatiquement vers la zone de visualisation 3D en bas sur mobile
+        setTimeout(() => {
+            const workspaceObj = document.querySelector('.workspace');
+            if (workspaceObj) {
+                workspaceObj.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        }, 300);
     }
 });
