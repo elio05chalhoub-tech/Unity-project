@@ -184,29 +184,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show the actual generated result
     function showResultInViewport(imageUrl) {
-        // Obtenir l'URL de base pour pouvoir ouvrir la nouvelle fenêtre correctement
-        const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
-        const viewerUrl = `${baseUrl}viewer.html?image=${encodeURIComponent(imageUrl)}`;
-
-        // Ouvrir automatiquement la nouvelle fenêtre (peut être bloqué par les pop-ups safari/chrome, d'où le bouton)
-        window.open(viewerUrl, '_blank');
-
+        // Enlève le texte de chargement et affiche la scène 360 directement dans la page
         viewport.innerHTML = `
-            <div style="width: 100%; height: 100%; border-radius: 20px; animation: fadeIn 1s ease-out forwards; position: relative; overflow: hidden; background: #1a1a2e; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+            <div style="width: 100%; height: 100%; position: relative; overflow: hidden; background: #000; border-radius: 20px;">
                 
-                <h2 style="color: #20c997; margin-bottom: 20px;">Le monde a été généré avec succès !</h2>
-                <p style="color: #a0a0b0; max-width: 80%; margin-bottom: 30px;">
-                    Une nouvelle fenêtre devrait s'être ouverte avec votre vue 360. Si votre navigateur l'a bloquée, cliquez sur le bouton ci-dessous.
-                </p>
+                <!-- A-Frame 360 Viewer (Embedded on Desktop, Fullscreen ready on Mobile) -->
+                <a-scene embedded style="width: 100%; height: 100%;" vr-mode-ui="enabled: false">
+                    <a-sky src="${imageUrl}" rotation="0 -90 0"></a-sky>
+                    <!-- Permet le glissement horizontal ET vertical sur mobile (touchEnabled, magicWindowTrackingEnabled) -->
+                    <a-entity camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: true" position="0 0 0"></a-entity>
+                </a-scene>
 
-                <img src="${imageUrl}" alt="Aperçu miniature" style="width: 80%; max-height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+                <!-- UI Overlay: Instructions pour l'utilisateur -->
+                <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px; backdrop-filter: blur(5px); z-index: 999; color: white; display: flex; align-items: center; gap: 10px; font-weight: bold; pointer-events: none; border: 1px solid rgba(255,126,95,0.4);">
+                    <span>👆 Glissez dans toutes les directions pour explorer le monde 360°</span>
+                </div>
 
-                <button onclick="window.open('${viewerUrl}', '_blank')" style="background: linear-gradient(135deg, #ff7e5f, #feb47b); color: #fff; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(255,126,95,0.4); display: flex; align-items: center; gap: 8px; transition: transform 0.2s;">
-                    <span>🌍 Ouvrir le visualiseur 360° en plein écran</span>
-                </button>
-                
-                <div style="margin-top: 20px;">
-                    <a href="${imageUrl}" target="_blank" style="color: rgba(255,255,255,0.5); text-decoration: underline; font-size: 0.9rem;">Télécharger l'image brute</a>
+                <!-- Bouton optionnel Télécharger en bas -->
+                <div style="position: absolute; bottom: 20px; right: 20px; z-index: 999;">
+                    <a href="${imageUrl}" target="_blank" style="background: rgba(0,0,0,0.8); color: #fff; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2);">⬇️ Télécharger l'image</a>
                 </div>
             </div>
         `;
