@@ -1,35 +1,4 @@
-// Custom A-Frame component to allow full vertical and horizontal swipe on touch devices
-if (typeof AFRAME !== 'undefined') {
-    AFRAME.registerComponent('mobile-full-look', {
-        dependencies: ['look-controls'],
-        init: function () {
-            var lookControls = this.el.components['look-controls'];
-
-            // Override default A-Frame touch behavior (which only allows yaw/horizontal)
-            lookControls.onTouchMove = function (evt) {
-                var PI_2 = Math.PI / 2;
-                var direction = this.data.reverseMouseDrag ? 1 : -1;
-                var touch = evt.touches[0];
-                var canvas = this.el.sceneEl.canvas;
-
-                if (!this.touchStart || !this.data.touchEnabled) { return; }
-
-                var deltaX = 2 * Math.PI * (touch.pageX - this.touchStart.x) / canvas.clientWidth;
-                var deltaY = 2 * Math.PI * (touch.pageY - this.touchStart.y) / canvas.clientHeight;
-
-                // Update Yaw (Left/Right) and Pitch (Up/Down) based on finger movement
-                this.yawObject.rotation.y -= direction * deltaX * 0.5;
-                this.pitchObject.rotation.x -= direction * deltaY * 0.5;
-
-                // Prevent camera from flipping completely upside-down
-                this.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, this.pitchObject.rotation.x));
-
-                this.touchStart = { x: touch.pageX, y: touch.pageY };
-            }.bind(lookControls);
-        }
-    });
-}
-
+// Script principal de l'application WebVR
 document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const btnText = document.querySelector('.btn-text');
@@ -223,12 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- A-Frame 360 Viewer (Embedded on Desktop, Fullscreen ready on Mobile) -->
                 <a-scene embedded style="width: 100%; height: 100%;" vr-mode-ui="enabled: false">
                     <a-sky src="${imageUrl}" rotation="0 -90 0"></a-sky>
-                    <!-- Permet le glissement horizontal ET vertical sur mobile via notre nouveau bout de code -->
-                    <a-entity camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: false" mobile-full-look position="0 0 0"></a-entity>
+                    <!-- Permet le glissement horizontal via look-controls de base (le vertical sera géré manuellement ci-dessous) -->
+                    <a-entity id="vr-camera" camera look-controls="reverseMouseDrag: true, touchEnabled: true, magicWindowTrackingEnabled: false" position="0 0 0"></a-entity>
                 </a-scene>
 
                 <!-- UI Overlay: Instructions pour l'utilisateur -->
-                <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px; backdrop-filter: blur(5px); z-index: 999; color: white; display: flex; align-items: center; gap: 10px; font-weight: bold; pointer-events: none; border: 1px solid rgba(255,126,95,0.4);">
+                <div id="instruction-overlay" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px; backdrop-filter: blur(5px); z-index: 999; color: white; display: flex; align-items: center; gap: 10px; font-weight: bold; pointer-events: none; border: 1px solid rgba(255,126,95,0.4); transition: opacity 0.5s ease;">
                     <span>👆 Glissez dans toutes les directions pour explorer le monde 360°</span>
                 </div>
 
@@ -239,12 +208,67 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        // Scroll automatiquement vers la zone de visualisation 3D en bas sur mobile
+        // Code manuel pour assurer le Look Control 100% total sur Mobile (Haut/Bas/Gauche/Droite)
+        // et pour faire disparaître l'instruction au premier touché
         setTimeout(() => {
             const workspaceObj = document.querySelector('.workspace');
             if (workspaceObj) {
                 workspaceObj.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
-        }, 300);
+
+            const instructionOverlay = document.getElementById('instruction-overlay');
+            const sceneEl = document.querySelector('a-scene');
+            const cameraEl = document.getElementById('vr-camera');
+
+            if (sceneEl && cameraEl) {
+                let isDragging = false;
+                let previousTouchY = 0;
+                let currentPitch = 0;
+
+                sceneEl.addEventListener('touchstart', (e) => {
+                    // Cacher l'instruction dès le premier touché
+                    if (instructionOverlay) {
+                        instructionOverlay.style.opacity = '0';
+                        setTimeout(() => instructionOverlay.style.display = 'none', 500);
+                    }
+
+                    if (e.touches.length === 1) {
+                        isDragging = true;
+                        previousTouchY = e.touches[0].pageY;
+                        // Récupérer le pitch actuel de la caméra
+                        const rotation = cameraEl.getAttribute('rotation');
+                        if (rotation) currentPitch = rotation.x;
+                    }
+                }, { passive: true });
+
+                sceneEl.addEventListener('touchend', () => {
+                    isDragging = false;
+                }, { passive: true });
+
+                sceneEl.addEventListener('touchmove', (e) => {
+                    if (!isDragging || e.touches.length > 1) return;
+
+                    const touchY = e.touches[0].pageY;
+                    const deltaY = touchY - previousTouchY;
+                    previousTouchY = touchY;
+
+                    // A-Frame's look-controls gère déjà parfaitement le delta X (droite/gauche)
+                    // Nous gérons manuellement le delta Y (Haut/Bas) qui est souvent bloqué
+                    const sensitivity = 0.3; // Vitesse de rotation
+                    currentPitch += (deltaY * sensitivity);
+
+                    // Limiter pour ne pas faire de looping complet (regarder ses pieds/ciel max)
+                    currentPitch = Math.max(-85, Math.min(85, currentPitch));
+
+                    // Mettre à jour seulement l'axe X (pitch) sans toucher au Y (yaw) géré par A-Frame
+                    const currentRot = cameraEl.getAttribute('rotation');
+                    cameraEl.setAttribute('rotation', {
+                        x: currentPitch,
+                        y: currentRot.y,
+                        z: currentRot.z
+                    });
+                }, { passive: true });
+            }
+        }, 500);
     }
 });
