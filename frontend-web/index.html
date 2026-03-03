@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intégration de modèle IA Projet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- A-Frame Library for 360-degree VR Viewer -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Panel -->
+        <aside class="glass-panel sidebar">
+            <header>
+                <div class="logo-orb"></div>
+                <h1>Intégration de modèle IA Projet</h1>
+            </header>
+
+            <div class="control-group">
+                <label>Source de l'Image (Requis)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btn-upload" class="action-btn">📁 Uploader</button>
+                    <button id="btn-camera" class="action-btn">📷 Caméra</button>
+                    <input type="file" id="file-input" accept="image/*" style="display: none;" />
+                </div>
+            </div>
+
+            <div id="camera-container"
+                style="display: none; position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.1);">
+                <video id="camera-video" autoplay playsinline style="width: 100%; display: block;"></video>
+                <div style="position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: center;">
+                    <button id="btn-capture" class="action-btn" style="background: rgba(255, 126, 95, 0.9);">📸 Prendre
+                        la photo</button>
+                </div>
+            </div>
+
+            <div id="preview-container"
+                style="display: none; position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid rgba(255, 126, 95, 0.5); box-shadow: 0 0 10px rgba(255, 126, 95, 0.2);">
+                <img id="image-preview" src="" alt="Aperçu de l'image" style="width: 100%; display: block;" />
+                <button id="btn-clear"
+                    style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 0.8rem;">❌</button>
+            </div>
+            <canvas id="camera-canvas" style="display: none;"></canvas>
+
+            <div class="control-group">
+                <label for="style-select">Style Visuel</label>
+                <div class="custom-select-wrapper">
+                    <select id="style-select">
+                        <option value="realistic">Réaliste 3D</option>
+                        <option value="fantasy">Fantaisie Épique</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                        <option value="anime">Anime (Studio Ghibli)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="generate-btn" class="glow-button">
+                <span class="btn-text">Générer le Monde</span>
+                <div class="loader-spinner" id="btn-loader"></div>
+            </button>
+
+            <div class="status-box" id="status-box">
+                <p id="status-text">Prêt pour la génération.</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="workspace">
+            <div class="viewport glass-panel" id="viewport">
+                <!-- Content will be injected here during/after generation -->
+                <div class="viewport-placeholder">
+                    <div class="hologram-grid"></div>
+                    <div class="placeholder-text">
+                        <h2>Aucun Environnement WebVR Actif</h2>
+                        <p>Prenez ou uploadez une image, puis générez pour visualiser le monde 360° ici.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

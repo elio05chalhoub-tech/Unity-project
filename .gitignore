@@ -1,0 +1,31 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/.env
+
+# Unity
+unity/[Ll]ibrary/
+unity/[Tt]emp/
+unity/[Oo]bj/
+unity/[Bb]uild/
+unity/[Bb]uilds/
+unity/[Mm]emoryCaptures/
+unity/[Ll]ogs/
+unity/sysinfo.txt
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# OS
+.DS_Store
+Thumbs.db
