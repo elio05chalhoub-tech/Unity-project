@@ -33,9 +33,39 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            currentImageBlob = file;
-            showPreview(URL.createObjectURL(file));
-            stopCamera();
+
+            // Resize image to max 1024px before uploading to avoid huge mobile payload limits
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_DIMENSION = 1024;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > MAX_DIMENSION) {
+                        height *= MAX_DIMENSION / width;
+                        width = MAX_DIMENSION;
+                    } else if (height > MAX_DIMENSION) {
+                        width *= MAX_DIMENSION / height;
+                        height = MAX_DIMENSION;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        currentImageBlob = blob;
+                        showPreview(URL.createObjectURL(blob));
+                        stopCamera();
+                    }, 'image/jpeg', 0.9);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
         }
     });
 
@@ -53,10 +83,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnCapture.addEventListener('click', () => {
         if (!cameraStream) return;
-        cameraCanvas.width = cameraVideo.videoWidth;
-        cameraCanvas.height = cameraVideo.videoHeight;
+        // Réduire la résolution de l'image (optimisation pour API mobile)
+        const MAX_DIMENSION = 1024;
+        let width = cameraVideo.videoWidth;
+        let height = cameraVideo.videoHeight;
+
+        if (width > height && width > MAX_DIMENSION) {
+            height *= MAX_DIMENSION / width;
+            width = MAX_DIMENSION;
+        } else if (height > MAX_DIMENSION) {
+            width *= MAX_DIMENSION / height;
+            height = MAX_DIMENSION;
+        }
+
+        cameraCanvas.width = width;
+        cameraCanvas.height = height;
         const ctx = cameraCanvas.getContext('2d');
-        ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+        ctx.drawImage(cameraVideo, 0, 0, width, height);
 
         cameraCanvas.toBlob((blob) => {
             currentImageBlob = blob;
@@ -115,8 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('image', currentImageBlob, 'capture.jpg');
             formData.append('prompt', 'A photorealistic environment based precisely on the provided image sketch.');
 
-            // Note: The backend currently hardcodes style and negative text, but we could pass them here
-            // if we modify the backend later. For now we just send the required fields.
+            // Send the style chosen by the user in the UI
+            const styleSelect = document.getElementById('style-select');
+            const selectedStyle = styleSelect ? styleSelect.value : 'realistic';
+            formData.append('style', selectedStyle);
 
             statusText.textContent = "Envoi de la requête à l'IA...";
 

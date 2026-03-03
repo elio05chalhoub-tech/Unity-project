@@ -47,7 +47,8 @@ async def health_check():
 @app.post("/generate")
 async def generate_skybox(
     image: UploadFile = File(...),
-    prompt: str = Form("A completely accurate 360 environment based on the uploaded image. Must have a seamless, solid ground floor at the bottom of the spherical panorama.")
+    prompt: str = Form("A completely accurate 360 environment based on the uploaded image. Must have a seamless, solid ground floor at the bottom of the spherical panorama."),
+    style: str = Form("realistic")
 ):
     """
     Phase 2: Remix Image to 3D World Concept with Vision AI
@@ -84,7 +85,14 @@ async def generate_skybox(
             client = genai.Client(api_key=gemini_key)
             image_file = client.files.upload(file=tmp_path)
             
-            vision_instruction = "You are a literal image describer used to generate 360 Skybox prompts. Write a highly detailed, photorealistic 1-paragraph description of exactly what is in this sketch. Do not hallucinate elements that are not there (like sunsets or blue skies) unless explicitly drawn. Assume the landscape has a solid, continuous floor matching the environment shown. Output only the prompt paragraph."
+            vision_instruction = (
+                "You are an expert AI vision analyzer for 360 Skybox generation. "
+                "Write a highly detailed, 1-paragraph description of exactly what is in this image. "
+                "CRITICAL: You MUST explicitly identify and preserve the core subject and setting (e.g., if it is a soccer stadium, a beach, a bedroom, you must say so). "
+                "Do not hallucinate elements that are not there (like sunsets or blue skies) unless explicitly drawn. "
+                "Assume the landscape has a solid, continuous floor matching the environment shown. "
+                "Output ONLY the prompt paragraph."
+            )
             
             vision_response = client.models.generate_content(
                 model='gemini-2.5-flash',
@@ -116,14 +124,25 @@ async def generate_skybox(
         "Accept": "application/json"
     }
 
+    # Map UI style selection to Blockade Labs style IDs
+    # Known Blockade IDs (approximate examples for remix model)
+    # 9 = Sci-Fi/Dream, 4 = Digital Painting, 21 = Realism, 29 = Anime, 6 = Cyberpunk
+    STYLE_MAP = {
+        "realistic": "21",
+        "fantasy": "4",
+        "cyberpunk": "6",
+        "anime": "29"
+    }
+    mapped_style_id = STYLE_MAP.get(style, "21") # Default to Realism
+
     # Prepare form data
     files = {
         "control_image": (image.filename or "upload.png", content, "image/png")
     }
     data = {
         "prompt": final_prompt,
-        "negative_text": "floating islands, floating trees, missing floor, unrealistic",
-        "skybox_style_id": "9",
+        "negative_text": "floating islands, floating trees, missing floor, unrealistic, distorted, deformed",
+        "skybox_style_id": mapped_style_id,
         "control_model": "remix",
         "enhance_prompt": "true"
     }
